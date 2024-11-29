@@ -16,12 +16,12 @@ class FileMoverHandler(FileSystemEventHandler):
             return
         file_path = event.src_path
         mod_time = os.path.getmtime(file_path)
-        date_folder = datetime.fromtimestamp(mod_time).strftime("%Y/%m/%d")
-        dated_path = os.path.join(self.dated_dir, date_folder)
-
+        year = datetime.fromtimestamp(mod_time).strftime("%Y")
+        month = datetime.fromtimestamp(mod_time).strftime("%m_%Y")
+        day = datetime.fromtimestamp(mod_time).strftime("%d_%m")
+        dated_path = os.path.join(self.dated_dir, year, month, day)
         os.makedirs(dated_path, exist_ok=True)
-        shutil.move(file_path, os.path.join(self.flat_dir, os.path.basename(file_path)))
-        shutil.copy(file_path, os.path.join(dated_path, os.path.basename(file_path)))
+        shutil.move(file_path, os.path.join(dated_path, os.path.basename(file_path)))
 
 def start_monitoring():
     with open("file_mover_config.json", "r") as config_file:

@@ -1,10 +1,12 @@
 import sys
+import os
+import subprocess
+import json
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, 
     QFileDialog, QMessageBox
 )
 from PyQt6.QtCore import Qt
-import json
 
 class FileMoverGUI(QWidget):
     def __init__(self):
@@ -46,6 +48,27 @@ class FileMoverGUI(QWidget):
 
         self.config = {}
 
+        # Load configuration if it exists
+        self.load_config()
+
+    def load_config(self):
+        config_path = "file_mover_config.json"
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r") as config_file:
+                    self.config = json.load(config_file)
+                self.update_labels()
+                QMessageBox.information(self, "Configuration Loaded", "Existing configuration loaded successfully.")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to load configuration: {e}")
+        else:
+            QMessageBox.information(self, "No Configuration", "No existing configuration found.")
+
+    def update_labels(self):
+        self.source_dir_label.setText(f"Super Staging Path: {self.config.get('source_dir', 'Not Set')}")
+        self.flat_dir_label.setText(f"Staging Path: {self.config.get('flat_dir', 'Not Set')}")
+        self.dated_dir_label.setText(f"PDF Archive Path: {self.config.get('dated_dir', 'Not Set')}")
+
     def set_source_dir(self):
         dir_path = QFileDialog.getExistingDirectory(self, "Select Super Staging Path")
         if dir_path:
@@ -69,9 +92,13 @@ class FileMoverGUI(QWidget):
             try:
                 with open("file_mover_config.json", "w") as config_file:
                     json.dump(self.config, config_file)
-                QMessageBox.information(self, "Saved", "Configuration saved! Daemon will start.")
+                
+                # Start the daemon as a separate process
+                subprocess.Popen(["python", "daemon.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+                QMessageBox.information(self, "Saved", "Configuration saved! Daemon has been started.")
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save configuration: {e}")
+                QMessageBox.critical(self, "Error", f"Failed to save configuration or start daemon: {e}")
         else:
             QMessageBox.warning(self, "Incomplete", "Please set all directories.")
 

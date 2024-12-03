@@ -1,6 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QMessageBox, QDesktopWidget
-from PyQt5.QtCore import Qt  
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, 
+    QFileDialog, QMessageBox
+)
+from PyQt6.QtCore import Qt
 import json
 
 class FileMoverGUI(QWidget):
@@ -8,17 +11,12 @@ class FileMoverGUI(QWidget):
         super().__init__()
         self.setWindowTitle("Staging Dropper & Archiver")
 
-        # Set initial size
-        self.resize(500, 500)
-
-        # Center the window
-        screen_geometry = QDesktopWidget().availableGeometry()
+        self.resize(550, 500)
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
         x = (screen_geometry.width() - 500) // 2
         y = (screen_geometry.height() - 500) // 2
         self.move(x, y)
-
-        # Keep window on top
-        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
 
         self.layout = QVBoxLayout()
 
@@ -79,6 +77,10 @@ class FileMoverGUI(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    # Apply Fusion theme
+    app.setStyle("Fusion")
+
     window = FileMoverGUI()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
